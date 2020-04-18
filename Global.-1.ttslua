@@ -1,0 +1,77 @@
+--[[ Lua code. See documentation: https://api.tabletopsimulator.com/ --]]
+
+--[[ The onLoad event is called after the game save finishes loading. --]]
+function onLoad()
+    print('Loaded Canasta\'s script!')
+end
+
+function getTtsObjectType(ttsObject)
+    return ttsObject.tag
+end
+
+function getCardValue(card)
+    -- It looks like there is no default way to get a card value
+    -- in tts. You have to manually assign all cards a value and a suit
+    
+    local value = 0
+    
+    return value
+end
+
+function getDeckValue(deck)
+    local deckTable, value
+
+    deckTable = deck.getObjects()
+    value = 0
+
+    for k,v in ipairs(deckTable) do
+        -- eventually this will cal getCardValue to add up all the values
+        -- value = value + getCardValue(v)
+        value = value + getCardValue(v)
+    end
+
+    return value
+end
+
+function processTtsObject(ttsObject)
+    local type
+
+    type = getTtsObjectType(ttsObject)
+
+    if type == 'Card' then
+        return getCardValue(ttsObject)
+    elseif type == 'Deck' then
+        return getDeckValue(ttsObject)
+    else
+        -- invalid object, return zero value
+        return 0
+    end
+end
+
+function countSelectedGroupScore(color)
+    local selectedObjects, steamName, value
+
+    selectedTtsObjects = Player[color].getSelectedObjects()
+    steamName = Player[color].steam_name
+
+    print(steamName.." has initiated a score count on their selected cards.")
+    -- Handle empty table case
+    if next(selectedTtsObjects) == nil then
+        print(steamName.." has no cards selected")
+    else
+        value = 0
+        for k,v in ipairs(selectedTtsObjects) do
+            value = value + processTtsObject(v)
+        end
+        print(steamName.." has "..value.." points in their selection.")
+    end
+    -- Iterate over selected objects, check if they're cards, and add points
+end
+
+function onScriptingButtonUp(index, color)
+    -- 1 key on numpad pressed
+    if(index == 1)
+    then
+        countSelectedGroupScore(color)
+    end
+end
